@@ -458,7 +458,7 @@ describe('select', function() {
 
 
   describe('ngOptions', function() {
-    function createSelect(attrs, blank, unknown) {
+    function createSelect(attrs, blank, unknown, disabled) {
       var html = '<select';
       forEach(attrs, function(value, key) {
         if (isBoolean(value)) {
@@ -470,6 +470,7 @@ describe('select', function() {
       html += '>' +
         (blank ? (isString(blank) ? blank : '<option value="">blank</option>') : '') +
         (unknown ? (isString(unknown) ? unknown : '<option value="?">unknown</option>') : '') +
+        (disabled ? (isString(disabled) ? blank : '<option value="" disabled="true">blank</option>') : '') +
       '</select>';
 
       compile(html);
@@ -744,14 +745,48 @@ describe('select', function() {
 
       var options = element.find('option');
       var optionToSelect = options.eq(1);
-
       expect(optionToSelect.text()).toBe('B');
 
       optionToSelect.prop('selected', true);
       scope.$digest();
-
-      expect(optionToSelect.prop('selected')).toBe(true);
+      expect(optionToSelect.prop('selected')).not.toBe(true);
       expect(scope.selected).toBe(scope.values[0]);
+    });
+
+    it('should allow the initial selection of a disabled element',
+      function() {
+      //Create a select element with a disabled option
+      createSelect({
+        'ng-model':'selected',
+        'ng-options':'value.name for value in values',
+        'ng-required': 'required'
+      }, false, false, true);
+
+      //Add options 'A' and 'B'
+      //Set the select to be HTML5 'required'
+      scope.$apply(function() {
+        scope.values = [{name: 'A'}, {name: 'B'}];
+        scope.required = true;
+      });
+
+      //Find the disabled option and select it
+      var options = element.find('option');
+      var optionToSelect = options.eq(0);
+      optionToSelect.prop('selected', true);
+
+      //Expect that the disabled item can be selected
+      expect(optionToSelect.prop('selected')).toBe(true);
+      //Expect that the browser won't automatically pick a non-disabled item
+      expect(options.eq(1).prop('selected')).not.toBe(true);
+      //Expect that with the disabled option selected, validity will be false
+      expect(element[0].validity.valid).toBe(false);
+
+      //Select a non-disabled option
+      options.eq(1).prop('selected', true);
+      //Expect it to be selected
+      expect(options.eq(1).prop('selected')).toBe(true);
+      //Expect the validity to be true
+      expect(element[0].validity.valid).toBe(true);
     });
 
     describe('binding', function() {
