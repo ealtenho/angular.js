@@ -754,6 +754,26 @@ describe('select', function() {
       expect(scope.selected).toBe(scope.values[0]);
     });
 
+    it('should allow the selection of a disabled option as the first element in a required select',
+        function() {
+          var html = '<select';
+          html += ' required>';
+          html += '<option value="" disabled>Choose One</option>';
+          html += '<option value="1">Option One</option>';
+          html += '</select>';
+
+          compile(html);
+
+          document.body.innerHTML = html;
+
+          var options = element.find('option');
+          var optionToSelect = options.eq(0);
+          expect(optionToSelect.text()).toBe('Choose One');
+          expect(optionToSelect.prop('selected')).toBe(true);
+
+          dealoc(element);
+    });
+
     describe('binding', function() {
 
       it('should bind to scope value', function() {
