@@ -754,25 +754,48 @@ describe('select', function() {
       expect(scope.selected).toBe(scope.values[0]);
     });
 
-    it('should allow the selection of a disabled option as the first element in a required select',
-        function() {
-          var html = '<select';
-          html += ' required>';
-          html += '<option value="" disabled>Choose One</option>';
-          html += '<option value="1">Option One</option>';
-          html += '</select>';
+    describe('disabled blank', function() {
+      it('should select disabled blank by default', function() {
+        var html = '<select ng-model="someModel" ng-options="c for c in choices">' +
+                     '<option value="" disabled>Choose One</option>' +
+                   '</select>';
+        scope.$apply(function() {
+          scope.choices = ['A', 'B', 'C'];
+        });
 
-          compile(html);
+        compile(html);
 
-          document.body.innerHTML = html;
+        var options = element.find('option');
+        var optionToSelect = options.eq(0);
+        expect(optionToSelect.text()).toBe('Choose One');
+        expect(optionToSelect.prop('selected')).toBe(true);
+        expect(element.val()).toBe('');
 
-          var options = element.find('option');
-          var optionToSelect = options.eq(0);
-          expect(optionToSelect.text()).toBe('Choose One');
-          expect(optionToSelect.prop('selected')).toBe(true);
+        dealoc(element);
+      });
 
-          dealoc(element);
+
+      it('should select disabled blank by default when select is required', function() {
+        var html = '<select ng-model="someModel" ng-options="c for c in choices" required>' +
+                     '<option value="" disabled>Choose One</option>' +
+                   '</select>';
+        scope.$apply(function() {
+          scope.choices = ['A', 'B', 'C'];
+        });
+
+        compile(html);
+
+        var options = element.find('option');
+        var optionToSelect = options.eq(0);
+        expect(optionToSelect.text()).toBe('Choose One');
+        expect(optionToSelect.prop('selected')).toBe(true);
+        expect(element.val()).toBe('');
+
+        dealoc(element);
+      });
+
     });
+
 
     describe('binding', function() {
 
